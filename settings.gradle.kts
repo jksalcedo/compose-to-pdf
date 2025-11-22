@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ComposeToPDF"
 include(":app")
- 
+include(":composeToPdf")
