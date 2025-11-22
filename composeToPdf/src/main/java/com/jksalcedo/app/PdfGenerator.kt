@@ -1,4 +1,4 @@
-package com.jksalcedo.composetopdf
+package com.jksalcedo.app
 
 //noinspection SuspiciousImport
 import android.R

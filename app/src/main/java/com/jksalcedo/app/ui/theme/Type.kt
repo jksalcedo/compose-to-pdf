@@ -1,4 +1,4 @@
-package com.jksalcedo.composetopdf.ui.theme
+package com.jksalcedo.app.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    namespace = "com.jksalcedo.composetopdf"
+    namespace = "com.jksalcedo.app"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.jksalcedo.composetopdf"
+        applicationId = "com.jksalcedo.app"
         minSdk = 23
         targetSdk = 36
         versionCode = 1
