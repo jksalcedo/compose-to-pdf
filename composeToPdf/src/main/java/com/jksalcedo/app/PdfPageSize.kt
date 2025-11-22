@@ -1,4 +1,4 @@
-package com.jksalcedo.composetopdf
+package com.jksalcedo.app
 
 data class PdfPageSize(val width: Int, val height: Int) {
     companion object {
