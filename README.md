@@ -24,7 +24,7 @@ Add the dependency to `app/build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.YourUsername:ComposeToPdf:1.0.0-beta01")
+    implementation("com.github.jksalcedo:compose-to-pdf:1.0.0-beta01")
 }
 ```
 
