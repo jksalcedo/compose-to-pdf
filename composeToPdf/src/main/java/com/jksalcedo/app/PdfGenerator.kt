@@ -29,6 +29,7 @@ import android.graphics.pdf.PdfDocument
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.view.ViewTreeObserver
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -41,9 +42,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.OutputStream
+import kotlin.coroutines.resume
 
 class PdfGenerator(private val context: Context) {
 
@@ -111,9 +113,11 @@ class PdfGenerator(private val context: Context) {
                         contentReady.await()
                         viewAttached = true
 
-                        delay(300)
+                        // Wait for the next frame
+                        waitForNextFrame(composeView)
+
                         // Wait for the images to fully load
-                        imageMonitor.waitForImages()
+                        imageMonitor.waitForImages(composeView)
 
                         composeView.measure(
                             View.MeasureSpec.makeMeasureSpec(
@@ -126,7 +130,9 @@ class PdfGenerator(private val context: Context) {
                             )
                         )
                         composeView.layout(0, 0, pageSize.width, pageSize.height)
-                        delay(100)
+
+                        // Wait for the view to be ready to draw
+                        waitForDrawReady(composeView)
                         composeView.draw(page.canvas)
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -161,5 +167,36 @@ class PdfGenerator(private val context: Context) {
     private fun Int.toDp(): Dp {
         val density = context.resources.displayMetrics.density
         return (this / density).dp
+    }
+
+    private suspend fun waitForNextFrame(view: View) = suspendCancellableCoroutine { continuation ->
+        view.post {
+            continuation.resume(Unit)
+        }
+    }
+
+    private suspend fun waitForDrawReady(view: View) = suspendCancellableCoroutine { continuation ->
+        var resumed = false
+        val observer = view.viewTreeObserver
+        val listener = object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                if (!resumed) {
+                    resumed = true
+                    view.viewTreeObserver.removeOnPreDrawListener(this)
+                    continuation.resume(Unit)
+                }
+                return true
+            }
+        }
+        observer.addOnPreDrawListener(listener)
+
+        // post to check if view is already ready
+        view.post {
+            if (!resumed && view.width > 0 && view.height > 0 && view.isAttachedToWindow) {
+                resumed = true
+                observer.removeOnPreDrawListener(listener)
+                continuation.resume(Unit)
+            }
+        }
     }
 }
