@@ -130,6 +130,7 @@ class PdfGenerator(private val context: Context) {
                         composeView.draw(page.canvas)
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        return@withContext Result.failure(e)
                     } finally {
                         if (viewAttached) {
                             rootLayout.removeView(composeView)
