@@ -80,7 +80,26 @@ fun Layout(context: Context, content: TextFieldState) {
                                 val outputStream = FileOutputStream(file)
                                 val result = pdfGenerator.generate(
                                     outputStream = outputStream,
-                                    pageSize = PdfPageSize.A4(100),
+                                    pageSize = PdfPageSize.A4(72)
+                                        .orientation(Orientation.LANDSCAPE),
+                                    pages = listOf({
+                                        Text(
+                                            text = content.text.toString()
+                                        )
+                                    }, {
+                                        PdfAsyncImage(
+                                            model = "https://www.pixelstalk.net/wp-content/uploads/2016/06/HD-images-of-nature-download.jpg",
+                                            contentDescription = ""
+                                        )
+                                    }
+                                    )
+                                )
+                                val file2 = File(it, "test2.pdf")
+                                val outputStream2 = FileOutputStream(file2)
+                                pdfGenerator.generate(
+                                    outputStream = outputStream2,
+                                    pageSize = PdfPageSize.A4(200)
+                                        .orientation(Orientation.LANDSCAPE),
                                     pages = listOf({
                                         Text(
                                             text = content.text.toString()

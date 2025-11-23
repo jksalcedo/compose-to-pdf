@@ -87,8 +87,8 @@ class PdfGenerator(private val context: Context) {
                                     Box(
                                         modifier = Modifier
                                             .size(
-                                                pageSize.width.toDp(),
-                                                pageSize.height.toDp()
+                                                pageSize.width.toDp(pageSize.dpi),
+                                                pageSize.height.toDp(pageSize.dpi)
                                             )
                                             .onGloballyPositioned {
                                                 if (!contentReady.isCompleted) {
@@ -164,9 +164,10 @@ class PdfGenerator(private val context: Context) {
         }
     }
 
-    private fun Int.toDp(): Dp {
-        val density = context.resources.displayMetrics.density
-        return (this / density).dp
+    private fun Int.toDp(dpi: Int): Dp {
+        // 160 is the baseline dpi of Android
+        val scaleFactor = dpi / 160f
+        return (this / scaleFactor).dp
     }
 
     private suspend fun waitForNextFrame(view: View) = suspendCancellableCoroutine { continuation ->
