@@ -37,10 +37,6 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = ""
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -72,8 +68,8 @@ publishing {
     publications {
         create<MavenPublication>("release") {
             groupId = "com.jksalcedo"
-            artifactId = "composetopdf"
-            version = "1.0.0"
+            artifactId = "compose-to-pdf"
+            version = "1.0.1"
 
             afterEvaluate {
                 from(components.getByName("release"))
