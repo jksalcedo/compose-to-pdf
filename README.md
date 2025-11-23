@@ -1,5 +1,7 @@
 # ComposeToPdf
 
+[![](https://jitpack.io/v/jksalcedo/compose-to-pdf.svg)](https://jitpack.io/#jksalcedo/compose-to-pdf)
+
 **Generate PDF from your Jetpack Compose UI Code**
 No XML layouts. No HTML conversion. Just pure Compose.
 
