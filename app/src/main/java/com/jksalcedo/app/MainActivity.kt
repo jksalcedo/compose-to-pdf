@@ -29,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,21 +77,36 @@ fun Layout(context: Context, content: TextFieldState) {
 
                             path?.let {
                                 val file = File(it, "test.pdf")
-                                pdfGenerator.generate(
-                                    destination = file,
+                                val outputStream = FileOutputStream(file)
+                                val result = pdfGenerator.generate(
+                                    outputStream = outputStream,
+                                    pageSize = PdfPageSize.A4(100),
                                     pages = listOf({
                                         Text(
                                             text = content.text.toString()
+                                        )
+                                    }, {
+                                        PdfAsyncImage(
+                                            model = "https://www.pixelstalk.net/wp-content/uploads/2016/06/HD-images-of-nature-download.jpg",
+                                            contentDescription = ""
                                         )
                                     }
                                     )
                                 )
                                 withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        context,
-                                        "PDF generated at ${file.absolutePath}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    if (result.isSuccess) {
+                                        Toast.makeText(
+                                            context,
+                                            "PDF generated at ${file.absolutePath}",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "PDF generation failed!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
                             }
                         }
