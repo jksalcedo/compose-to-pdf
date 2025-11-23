@@ -1,11 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("maven-publish")
+    id("com.diffplug.spotless") version "8.1.0"
 }
 
 android {
@@ -35,10 +35,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = ""
     }
 
     compileOptions {
@@ -72,8 +68,8 @@ publishing {
     publications {
         create<MavenPublication>("release") {
             groupId = "com.jksalcedo"
-            artifactId = "composetopdf"
-            version = "1.0.0"
+            artifactId = "compose-to-pdf"
+            version = "1.0.1"
 
             afterEvaluate {
                 from(components.getByName("release"))
@@ -82,3 +78,9 @@ publishing {
     }
 }
 
+spotless {
+    kotlin {
+        target("**/*.kt")
+        licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
+    }
+}
