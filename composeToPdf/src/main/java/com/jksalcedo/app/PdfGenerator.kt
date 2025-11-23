@@ -111,7 +111,7 @@ class PdfGenerator(private val context: Context) {
                         contentReady.await()
                         viewAttached = true
 
-                        delay(500)
+                        delay(300)
                         // Wait for the images to fully load
                         imageMonitor.waitForImages()
 
@@ -130,6 +130,9 @@ class PdfGenerator(private val context: Context) {
                         composeView.draw(page.canvas)
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        if (viewAttached) {
+                            rootLayout.removeView(composeView)
+                        }
                         return@withContext Result.failure(e)
                     } finally {
                         if (viewAttached) {
