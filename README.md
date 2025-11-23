@@ -33,23 +33,27 @@ dependencies {
 ## Usage
 
 ```kotlin
-val pdfGenerator = PdfGenerator(context)
+val pdfGenerator = PdfGenerator(context = context)
+val path = context.getExternalFilesDir("PDF")
 
-pdfGenerator.generate(
-    // filesDir is the output location
-    destination = File(filesDir, "invoice.pdf"),
-    pageSize = PdfPageSize.A4,
-    pages = listOf(
-        {
-            // Page 1 Content
-            Column(modifier = Modifier.background(Color.White)) {
-                Text("Invoice #1024")
-            }
-        }, {
-            // Page 2 Content
-            Text("Terms and Conditions")
-        }
-        // Other pages
+path?.let {
+val file = File(it, "test.pdf")
+val outputStream = FileOutputStream(file)
+val result = pdfGenerator.generate(
+    outputStream = outputStream,
+    // Allows custom DPI
+    pageSize = PdfPageSize.A4(100),
+    pages = listOf({
+        Text(
+            text = "Sample Text"
+        )
+    }, {
+        // Custom Asynchronous Image Loader
+        PdfAsyncImage(
+            model = "https://example.com/10.jpg",
+            contentDescription = ""
+        )
+    }
     )
 )
 ```
