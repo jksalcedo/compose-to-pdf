@@ -64,6 +64,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 }
 
 publishing {
@@ -71,7 +73,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.jksalcedo"
             artifactId = "composetopdf"
-            version = "1.0"
+            version = "1.0.0"
 
             afterEvaluate {
                 from(components.getByName("release"))
