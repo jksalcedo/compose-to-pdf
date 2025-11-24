@@ -54,13 +54,21 @@ class PdfGenerator(private val context: Context) {
      */
     suspend fun generate(
         outputStream: OutputStream,
-        pageSize: PdfPageSize = PdfPageSize.A4(), // Default to A4
+        pageSize: PdfPageSize = PdfPageSize.A4(72), // Default to A4
+        margin: Dp = 160.dp, // 1 inch
+        timeout: Long = 3000,
         pages: List<@Composable () -> Unit>
     ): Result<String> = withContext(Dispatchers.Main) {
 
         outputStream.use { out ->
             val pdfDocument = PdfDocument()
             val imageMonitor = PdfImageMonitor()
+
+            val contentWidth = pageSize.width - (margin.value * (pageSize.dpi / 160f) * 2).toInt()
+            val contentHeight = pageSize.height - (margin.value * (pageSize.dpi / 160f) * 2).toInt()
+
+            // margin in pixels
+            val marginPx = (margin.value * (pageSize.dpi / 160f)).toInt()
 
             try {
                 pages.forEachIndexed { index, pageContent ->
@@ -87,8 +95,8 @@ class PdfGenerator(private val context: Context) {
                                     Box(
                                         modifier = Modifier
                                             .size(
-                                                pageSize.width.toDp(pageSize.dpi),
-                                                pageSize.height.toDp(pageSize.dpi)
+                                                contentWidth.toDp(pageSize.dpi),
+                                                contentHeight.toDp(pageSize.dpi)
                                             )
                                             .onGloballyPositioned {
                                                 if (!contentReady.isCompleted) {
@@ -106,11 +114,15 @@ class PdfGenerator(private val context: Context) {
                         composeView.alpha = 0f
                         rootLayout.addView(
                             composeView,
-                            LayoutParams(pageSize.width, pageSize.height)
+                            LayoutParams(contentWidth, contentHeight)
                         )
 
                         // Safely wait for the content
-                        contentReady.await()
+                        withContext(Dispatchers.Main) {
+                            kotlinx.coroutines.withTimeout(timeout) {
+                                contentReady.await()
+                            }
+                        }
                         viewAttached = true
 
                         // Wait for the next frame
@@ -121,11 +133,11 @@ class PdfGenerator(private val context: Context) {
 
                         composeView.measure(
                             View.MeasureSpec.makeMeasureSpec(
-                                pageSize.width,
+                                contentWidth,
                                 View.MeasureSpec.EXACTLY
                             ),
                             View.MeasureSpec.makeMeasureSpec(
-                                pageSize.height,
+                                contentHeight,
                                 View.MeasureSpec.EXACTLY
                             )
                         )
@@ -133,7 +145,11 @@ class PdfGenerator(private val context: Context) {
 
                         // Wait for the view to be ready to draw
                         waitForDrawReady(composeView)
+
+                        page.canvas.save()
+                        page.canvas.translate(marginPx.toFloat(), marginPx.toFloat())
                         composeView.draw(page.canvas)
+                        page.canvas.restore()
                     } catch (e: Exception) {
                         e.printStackTrace()
                         if (viewAttached) {

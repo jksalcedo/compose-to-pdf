@@ -127,10 +127,10 @@ data class PdfPageSize(val width: Int, val height: Int, val dpi: Int = 72) {
         fun PosterLarge(dpi: Int = 72) =
             PdfPageSize((24.0 * dpi).toInt(), (36.0 * dpi).toInt(), dpi)
 
-        // 16:9 HD: 1920 x 1080 pixels (scaled to inches at given DPI)
+        // 16:9 HD: 1920 x 1080 pixels
         fun HD1080(dpi: Int = 72) = PdfPageSize(1920, 1080, dpi)
 
-        // 16:9 4K: 3840 x 2160 pixels (scaled to inches at given DPI)
+        // 16:9 4K: 3840 x 2160 pixels
         fun UHD4K(dpi: Int = 72) = PdfPageSize(3840, 2160, dpi)
 
 
