@@ -13,6 +13,8 @@ No XML layouts. No HTML conversion. Just pure Compose.
 - Invisible: Renders in the background without disturbing the UI.
 - Asynchronous: Supports asynchronous image loading.
 - Page Size: Supports all standard page sizes (A*, B*, etc.).
+- Custom timeouts
+- Page Orientation
 
 ## Installation
 
