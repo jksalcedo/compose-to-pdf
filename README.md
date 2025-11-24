@@ -37,24 +37,20 @@ dependencies {
 ## Usage
 
 ```kotlin
-val pdfGenerator = PdfGenerator(context = context)
-val path = context.getExternalFilesDir("PDF")
-
-path?.let {
 val file = File(it, "test.pdf")
 val outputStream = FileOutputStream(file)
 val result = pdfGenerator.generate(
     outputStream = outputStream,
-    // Allows custom DPI
-    pageSize = PdfPageSize.A4(100),
+    pageSize = PdfPageSize.A4(72) // with 72 dpi (defaultt)
+        .orientation(Orientation.LANDSCAPE), // new feature
+    margin = 160.dp, // new feature (1 inch)
     pages = listOf({
         Text(
-            text = "Sample Text"
+            text = content.text.toString()
         )
     }, {
-        // Custom Asynchronous Image Loader
         PdfAsyncImage(
-            model = "https://example.com/10.jpg",
+            model = "https://www.pixelstalk.net/wp-content/uploads/2016/06/HD-images-of-nature-download.jpg",
             contentDescription = ""
         )
     }
