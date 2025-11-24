@@ -8,9 +8,11 @@ No XML layouts. No HTML conversion. Just pure Compose.
 ## Features
 
 - Native: Uses Android's native PdfDocument.
-- Vector: Content are vectors, not pixelated
+- Vector: Content are vectors, not pixelated (except for images)
 - Multi-Page: Simple API to generate multi-page documents.
 - Invisible: Renders in the background without disturbing the UI.
+- Asynchronous: Supports asynchronous image loading.
+- Page Size: Supports all standard page sizes (A*, B*, etc.).
 
 ## Installation
 
@@ -26,7 +28,7 @@ Add the dependency to `app/build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.jksalcedo:compose-to-pdf:1.0.0")
+    implementation("com.github.jksalcedo:compose-to-pdf:1.1.0")
 }
 ```
 
