@@ -14,6 +14,7 @@ No XML layouts. No HTML conversion. Just pure Compose.
 - Asynchronous: Supports asynchronous image loading.
 - Page Size: Supports all standard page sizes (A*, B*, etc.).
 - Custom timeouts
+- Custom page size
 - Page Orientation
 
 ## Installation
