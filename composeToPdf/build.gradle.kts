@@ -69,7 +69,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.jksalcedo"
             artifactId = "compose-to-pdf"
-            version = "1.1.0"
+            version = "1.1.1"
 
             afterEvaluate {
                 from(components.getByName("release"))
