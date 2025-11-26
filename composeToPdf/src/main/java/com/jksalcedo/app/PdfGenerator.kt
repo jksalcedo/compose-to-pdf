@@ -37,7 +37,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CompletableDeferred
@@ -64,6 +66,14 @@ class PdfGenerator(private val context: Context) {
             val pdfDocument = PdfDocument()
             val imageMonitor = PdfImageMonitor()
 
+            // Dynamic density so the content appears the same regardless of the DPI
+            val densityScale = pageSize.dpi / 72f
+            val pdfDensity = object : Density {
+                override val density: Float = densityScale
+                override val fontScale: Float = 1f
+            }
+
+            // size minus margin/padding
             val contentWidth = pageSize.width - (margin.value * (pageSize.dpi / 160f) * 2).toInt()
             val contentHeight = pageSize.height - (margin.value * (pageSize.dpi / 160f) * 2).toInt()
 
@@ -91,12 +101,15 @@ class PdfGenerator(private val context: Context) {
                         composeView.apply {
                             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
                             setContent {
-                                CompositionLocalProvider(LocalPdfImageMonitor provides imageMonitor) {
+                                CompositionLocalProvider(
+                                    LocalPdfImageMonitor provides imageMonitor,
+                                    LocalDensity provides pdfDensity
+                                ) {
                                     Box(
                                         modifier = Modifier
                                             .size(
-                                                contentWidth.toDp(pageSize.dpi),
-                                                contentHeight.toDp(pageSize.dpi)
+                                                contentWidth.dp,
+                                                contentHeight.dp
                                             )
                                             .onGloballyPositioned {
                                                 if (!contentReady.isCompleted) {
@@ -170,16 +183,18 @@ class PdfGenerator(private val context: Context) {
                     pdfDocument.writeTo(out)
                     out.flush()
                 }
+
+                return@withContext Result.success("Successfully generated ${pages.size} pages!")
             } catch (e: Exception) {
                 e.printStackTrace()
                 return@withContext Result.failure(e)
             } finally {
                 pdfDocument.close()
             }
-            return@withContext Result.success("Successfully generated ${pages.size} pages!")
         }
     }
 
+    @Deprecated("Obsolete")
     private fun Int.toDp(dpi: Int): Dp {
         // 160 is the baseline dpi of Android
         val scaleFactor = dpi / 160f
