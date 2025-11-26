@@ -1,11 +1,13 @@
 package com.jksalcedo.app
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +24,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.jksalcedo.app.ui.theme.ComposeToPDFTheme
 import kotlinx.coroutines.Dispatchers
@@ -81,18 +89,24 @@ fun Layout(context: Context, content: TextFieldState) {
                                 val result = pdfGenerator.generate(
                                     outputStream = outputStream,
                                     pageSize = PdfPageSize.A4(72)
-                                        .orientation(Orientation.LANDSCAPE),
+                                        .orientation(Orientation.PORTRAIT),
                                     margin = 160.dp,
-                                    pages = listOf({
-                                        Text(
-                                            text = content.text.toString()
-                                        )
-                                    }, {
-                                        PdfAsyncImage(
-                                            model = "https://www.pixelstalk.net/wp-content/uploads/2016/06/HD-images-of-nature-download.jpg",
-                                            contentDescription = ""
-                                        )
-                                    }
+                                    pages = listOf(
+                                        {
+                                            Text(
+                                                text = content.text.toString(),
+                                                fontSize = TextUnit(14F, TextUnitType.Sp)
+                                            )
+                                        },
+                                        {
+                                            DebugConfigStamp()
+                                        },
+                                        {
+                                            PdfAsyncImage(
+                                                model = "https://www.pixelstalk.net/wp-content/uploads/2016/06/HD-images-of-nature-download.jpg",
+                                                contentDescription = ""
+                                            )
+                                        },
                                     )
                                 )
                                 withContext(Dispatchers.Main) {
@@ -158,5 +172,25 @@ fun TextFieldPreview() {
             }
 
         }
+    }
+}
+
+@SuppressLint("ConfigurationScreenWidthHeight")
+@Composable
+fun DebugConfigStamp() {
+    val density = LocalDensity.current
+    val config = LocalConfiguration.current
+    val window = LocalWindowInfo.current
+
+    Column(
+        modifier = Modifier
+            .border(1.dp, Color.Red)
+            .padding(10.dp)
+    ) {
+        Text("DEBUG REPORT:")
+        Text("Density: ${density.density}")
+        Text("Font Scale: ${density.fontScale}")
+        Text("Config Screen Width: ${config.screenWidthDp}")
+        Text("Window Screen Width: ${window.containerSize.width}")
     }
 }
