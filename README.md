@@ -2,7 +2,7 @@
 
 [![](https://jitpack.io/v/jksalcedo/compose-to-pdf.svg)](https://jitpack.io/#jksalcedo/compose-to-pdf)
 
-**Generate PDF from your Jetpack Compose UI Code**
+**A ligtweight, offline library that let's you generate PDF from your Jetpack Compose UI Code** <br>
 No XML layouts. No HTML conversion. Just pure Compose.
 
 ## Features
