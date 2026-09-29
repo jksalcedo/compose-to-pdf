@@ -25,6 +25,7 @@ package com.jksalcedo.app
 import android.R
 import android.app.Activity
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.pdf.PdfDocument
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +49,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.OutputStream
 import kotlin.coroutines.resume
+import androidx.core.view.doOnPreDraw
+
 
 class PdfGenerator(private val context: Context) {
 
@@ -157,7 +160,7 @@ class PdfGenerator(private val context: Context) {
                         composeView.layout(0, 0, pageSize.width, pageSize.height)
 
                         // Wait for the view to be ready to draw
-                        waitForDrawReady(composeView)
+                       waitForDrawReady(composeView, rootLayout, page.canvas)
 
                         page.canvas.save()
                         page.canvas.translate(marginPx.toFloat(), marginPx.toFloat())
@@ -207,28 +210,22 @@ class PdfGenerator(private val context: Context) {
         }
     }
 
-    private suspend fun waitForDrawReady(view: View) = suspendCancellableCoroutine { continuation ->
-        var resumed = false
-        val observer = view.viewTreeObserver
+    private suspend fun waitForDrawReady(view: View, root: ViewGroup, canvas: Canvas) = suspendCancellableCoroutine { cont ->
         val listener = object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
-                if (!resumed) {
-                    resumed = true
-                    view.viewTreeObserver.removeOnPreDrawListener(this)
-                    continuation.resume(Unit)
-                }
+                view.viewTreeObserver.removeOnPreDrawListener(this)
+                if (cont.isActive) cont.resume(Unit)
                 return true
             }
         }
-        observer.addOnPreDrawListener(listener)
-
-        // post to check if view is already ready
-        view.post {
-            if (!resumed && view.width > 0 && view.height > 0 && view.isAttachedToWindow) {
-                resumed = true
-                observer.removeOnPreDrawListener(listener)
-                continuation.resume(Unit)
-            }
+        view.viewTreeObserver.addOnPreDrawListener(listener)
+        root.addView(
+            view, 0,
+            LayoutParams(canvas.width, canvas.height)
+        )
+        cont.invokeOnCancellation {
+            view.viewTreeObserver.removeOnPreDrawListener(listener)
+            root.removeView(view)
         }
     }
 }
