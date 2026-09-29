@@ -49,7 +49,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.OutputStream
 import kotlin.coroutines.resume
-import androidx.core.view.doOnPreDraw
+import kotlin.time.Duration.Companion.milliseconds
 
 
 class PdfGenerator(private val context: Context) {
@@ -135,7 +135,7 @@ class PdfGenerator(private val context: Context) {
 
                         // Safely wait for the content
                         withContext(Dispatchers.Main) {
-                            kotlinx.coroutines.withTimeout(timeout) {
+                            kotlinx.coroutines.withTimeout(timeout.milliseconds) {
                                 contentReady.await()
                             }
                         }
