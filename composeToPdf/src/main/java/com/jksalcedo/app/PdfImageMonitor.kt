@@ -38,7 +38,7 @@ class PdfImageMonitor {
     }
 
     fun notifyLoadingFinished() {
-        val current = loadingCount.decrementAndGet()
+        val current = loadingCount.updateAndGet { if (it > 0) it - 1 else 0 }
         if (current == 0) {
             isIdle.value = true
         }
