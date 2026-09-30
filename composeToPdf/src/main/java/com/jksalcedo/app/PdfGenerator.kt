@@ -25,6 +25,7 @@ package com.jksalcedo.app
 import android.R
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Canvas
 import android.graphics.pdf.PdfDocument
 import android.view.View
@@ -43,10 +44,12 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.OutputStream
 import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
@@ -67,7 +70,6 @@ class PdfGenerator(private val context: Context) {
 
         outputStream.use { out ->
             val pdfDocument = PdfDocument()
-            val imageMonitor = PdfImageMonitor()
 
             // Dynamic density so the content appears the same regardless of the DPI
             val densityScale = pageSize.dpi / 72f
@@ -86,6 +88,7 @@ class PdfGenerator(private val context: Context) {
             try {
                 pages.forEachIndexed { index, pageContent ->
 
+                    val imageMonitor = PdfImageMonitor()
                     val contentReady = CompletableDeferred<Unit>()
                     val pageInfo = PdfDocument.PageInfo.Builder(
                         pageSize.width, pageSize.height, index + 1
@@ -97,8 +100,12 @@ class PdfGenerator(private val context: Context) {
                     // keep the view invisible
                     val composeView = ComposeView(context = context)
                     val rootLayout =
-                        (context as? Activity)?.window?.decorView?.findViewById<ViewGroup>(R.id.content)
+                        context.findActivity()?.window?.decorView?.findViewById<ViewGroup>(R.id.content)
                             ?: throw IllegalStateException("Context must be an Activity")
+
+                    val contentWidthDp = with(pdfDensity) { contentWidth.toDp() }
+                    val contentHeightDp = with(pdfDensity) { contentHeight.toDp() }
+
 
                     try {
                         composeView.apply {
@@ -111,8 +118,8 @@ class PdfGenerator(private val context: Context) {
                                     Box(
                                         modifier = Modifier
                                             .size(
-                                                contentWidth.dp,
-                                                contentHeight.dp
+                                                contentWidthDp,
+                                                contentHeightDp
                                             )
                                             .onGloballyPositioned {
                                                 if (!contentReady.isCompleted) {
@@ -144,8 +151,10 @@ class PdfGenerator(private val context: Context) {
                         // Wait for the next frame
                         waitForNextFrame(composeView)
 
-                        // Wait for the images to fully load
-                        imageMonitor.waitForImages(composeView)
+                        withTimeoutOrNull(timeout.milliseconds) {
+                            // Wait for the images to fully load
+                            imageMonitor.waitForImages(composeView)
+                        }
 
                         composeView.measure(
                             View.MeasureSpec.makeMeasureSpec(
@@ -157,7 +166,7 @@ class PdfGenerator(private val context: Context) {
                                 View.MeasureSpec.EXACTLY
                             )
                         )
-                        composeView.layout(0, 0, pageSize.width, pageSize.height)
+                        composeView.layout(0, 0, contentWidth, contentHeight)
 
                         // Wait for the view to be ready to draw
                        waitForDrawReady(composeView, rootLayout, page.canvas)
@@ -188,8 +197,9 @@ class PdfGenerator(private val context: Context) {
                 }
 
                 return@withContext Result.success("Successfully generated ${pages.size} pages!")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                e.printStackTrace()
                 return@withContext Result.failure(e)
             } finally {
                 pdfDocument.close()
@@ -228,4 +238,14 @@ class PdfGenerator(private val context: Context) {
             root.removeView(view)
         }
     }
+
+    private fun Context.findActivity(): Activity? {
+        var context = this
+        while (context is ContextWrapper) {
+            if (context is Activity) return context
+            context = context.baseContext
+        }
+        return null
+    }
+
 }
