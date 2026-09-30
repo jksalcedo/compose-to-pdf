@@ -1,3 +1,12 @@
+## [1.1.2] - 2026-09-29
+
+### Fixed
+- Fix empty `classes.jar` in published AAR by disabling minification in the library module (#35)
+- Fix PDF content rendering synchronization
+
+### Other
+- Various fixes and performance improvements
+
 ## [1.1.1] - 2025-11-26
 
 ### Other

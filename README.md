@@ -31,7 +31,7 @@ Add the dependency to `app/build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.jksalcedo:compose-to-pdf:1.1.0")
+    implementation("com.github.jksalcedo:compose-to-pdf:1.1.2")
 }
 ```
 
@@ -42,7 +42,7 @@ val file = File(it, "test.pdf")
 val outputStream = FileOutputStream(file)
 val result = pdfGenerator.generate(
     outputStream = outputStream,
-    pageSize = PdfPageSize.A4(72) // with 72 dpi (defaultt)
+    pageSize = PdfPageSize.A4(72) // with 72 dpi (default)
         .orientation(Orientation.LANDSCAPE), // new feature
     margin = 160.dp, // new feature (1 inch)
     pages = listOf({
