@@ -5,17 +5,15 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("maven-publish")
-    id("com.diffplug.spotless") version "8.1.0"
+    id("com.diffplug.spotless") version "8.10.3"
 }
 
 android {
     namespace = "com.jksalcedo.composetopdf"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 37
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -41,13 +39,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
 
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
-        }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
-
 }
 
 dependencies {
@@ -69,7 +66,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.jksalcedo"
             artifactId = "compose-to-pdf"
-            version = "1.1.1"
+            version = "1.1.2"
 
             afterEvaluate {
                 from(components.getByName("release"))
